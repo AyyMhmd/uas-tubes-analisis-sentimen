@@ -53,14 +53,19 @@ def get_sentiment_textblob(text):
 # ==========================================
 # SIDEBAR: UPLOAD DATA
 # ==========================================
-st.sidebar.header("1. Upload Data")
-uploaded_file = st.sidebar.file_uploader(
-    "Upload file CSV (tiktok comments)", type=["csv"]
-)
+# ==========================================
+# SIDEBAR: INFO
+# ==========================================
+st.sidebar.header("Status Data")
+# uploaded_file = st.sidebar.file_uploader("Upload file CSV", type=["csv"])
+# Hardcoded dataset loading to mimic notebook results
+uploaded_file = "dataset_tiktok-comments-scraper_2025-12-09_02-52-00-697.csv"
 
-if uploaded_file is None:
-    st.info("👋 Silakan upload file CSV di menu sebelah kiri untuk memulai.")
-    st.stop()
+st.sidebar.success(f"📂 Dataset Auto-loaded:\n{uploaded_file}")
+
+# if uploaded_file is None:
+#     st.info("👋 Silakan upload file CSV di menu sebelah kiri untuk memulai.")
+#     st.stop()
 
 # ==========================================
 # PROSES UTAMA
