@@ -139,17 +139,24 @@ with st.spinner("Sedang memproses data dan melatih model..."):
     X_train_balanced = df_train_balanced.drop("label", axis=1).values
     y_train_balanced = df_train_balanced["label"]
 
-    # 5. Training Model (Logistic Regression)
-    # Logistic Regression biasanya lebih bagus untuk data tidak seimbang dibanding Naive Bayes
+    # 5. Training Model (Logistic Regression & Naive Bayes Comparison)
+    # Logistic Regression dipilih sebagai model utama
     from sklearn.linear_model import LogisticRegression
+    
+    # Train Naive Bayes
+    model_nb = MultinomialNB()
+    model_nb.fit(X_train_balanced, y_train_balanced)
+    acc_nb = model_nb.score(X_test, y_test)
+
+    # Train Logistic Regression (Model Utama)
     model = LogisticRegression(max_iter=1000, random_state=42)
     model.fit(X_train_balanced, y_train_balanced)
 
-    # 6. Evaluasi Awal
+    # 6. Evaluasi Awal (Logistic Regression)
     y_pred = model.predict(X_test)
-    accuracy = model.score(X_test, y_test)
+    accuracy = model.score(X_test, y_test) # Ini untuk Logistic Regression
 
-st.success(f"✅ Model berhasil dilatih! Akurasi: {accuracy:.2%}")
+st.success(f"✅ Model berhasil dilatih! Akurasi Utama (Logistic Regression): {accuracy:.2%}")
 
 # ==========================================
 # TABS UTAMA
@@ -207,7 +214,23 @@ with tab1:
 
 # --- TAB 2: EVALUASI ---
 with tab2:
-    st.subheader("Performa Model")
+    st.subheader("⚔️ Perbandingan Model")
+    
+    col_comp1, col_comp2 = st.columns(2)
+    
+    with col_comp1:
+        st.metric(label="Akurasi Naive Bayes", value=f"{acc_nb:.2%}")
+    
+    with col_comp2:
+        st.metric(label="Akurasi Logistic Regression (Selected)", value=f"{accuracy:.2%}", delta=f"{(accuracy - acc_nb):.2%}")
+
+    if accuracy > acc_nb:
+        st.caption("💡 **Kesimpulan:** Logistic Regression memberikan hasil yang lebih baik/tetap.")
+    else:
+        st.caption("💡 **Kesimpulan:** Naive Bayes memberikan hasil yang kompetitif.")
+
+    st.divider()
+    st.subheader("Performa Model Utama (Logistic Regression)")
 
     col_ev1, col_ev2 = st.columns(2)
 
