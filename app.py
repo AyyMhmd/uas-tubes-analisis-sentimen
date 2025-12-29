@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from wordcloud import WordCloud
 import re
-import joblib  # Library untuk menyimpan model .pkl
+import joblib  
 import io
 
 from sklearn.model_selection import train_test_split
@@ -80,6 +80,38 @@ if "text" not in df.columns:
     st.stop()
 
 with st.spinner("Sedang memproses data dan melatih model..."):
+    # --- DATA AUGMENTATION (Inject Manual Data) ---
+    # Menambahkan data dummy agar model kenal "istilah gaul/spesifik"
+    augment_data = [
+        # NEGATIF
+        {"text": "dasar buaya darat", "label": "Negatif"},
+        {"text": "mahasiswa teknik buaya", "label": "Negatif"},
+        {"text": "bikit sakit hati", "label": "Negatif"},
+        {"text": "sakit hati banget", "label": "Negatif"},
+        {"text": "parah bat lu", "label": "Negatif"},
+        {"text": "kecewa berat sumpah", "label": "Negatif"},
+        
+        # POSITIF
+        {"text": "keren banget kontennya", "label": "Positif"},
+        {"text": "sangat bermanfaat min", "label": "Positif"},
+        {"text": "mantap bang", "label": "Positif"},
+        {"text": "suka banget videonya", "label": "Positif"},
+        {"text": "semangat terus lakok", "label": "Positif"},
+        {"text": "teknik pinter", "label": "Positif"},
+        {"text": "teknik bagus", "label": "Positif"},
+        {"text": "teknik baik", "label": "Positif"},
+        {"text": "orang nya greenflag", "label": "Positif"},
+        
+        # NETRAL
+        {"text": "info loker", "label": "Netral"},
+        {"text": "lagunya judulnya apa", "label": "Netral"},
+        {"text": "tutorialnya mana", "label": "Netral"},
+        {"text": "durasi videonya berapa", "label": "Netral"},
+        {"text": "lokasi dimana", "label": "Netral"},
+    ]
+    df_aug = pd.DataFrame(augment_data)
+    df = pd.concat([df, df_aug], ignore_index=True)
+
     # 1. Preprocessing
     df["cleaned_text"] = df["text"].apply(clean_text)
 
@@ -106,7 +138,6 @@ with st.spinner("Sedang memproses data dan melatih model..."):
     )
 
     # --- OVERSAMPLING MANUAL (Agar seimbang) ---
-    # Kita tidak pakai imblearn agar tidak perlu install lib baru
     from sklearn.utils import resample
 
     # Gabungkan X_train dan y_train untuk resampling
@@ -178,14 +209,17 @@ with tab1:
 
     with col1:
         # Bar Chart
-        fig_count = plt.figure(figsize=(6, 4))
+        fig_count, ax = plt.subplots(figsize=(6, 4))
         sns.countplot(
             x="label",
             data=df_clean,
+            hue="label",
+            legend=False,
             palette="pastel",
             order=["Positif", "Netral", "Negatif"],
+            ax=ax
         )
-        plt.title("Jumlah Komentar per Sentimen")
+        ax.set_title("Jumlah Komentar per Sentimen")
         st.pyplot(fig_count)
 
     with col2:
@@ -207,9 +241,9 @@ with tab1:
     wordcloud = WordCloud(width=800, height=300, background_color="white").generate(
         all_text
     )
-    fig_wc = plt.figure(figsize=(10, 5))
-    plt.imshow(wordcloud, interpolation="bilinear")
-    plt.axis("off")
+    fig_wc, ax = plt.subplots(figsize=(10, 5))
+    ax.imshow(wordcloud, interpolation="bilinear")
+    ax.axis("off")
     st.pyplot(fig_wc)
 
 # --- TAB 2: EVALUASI ---
@@ -242,7 +276,7 @@ with tab2:
     with col_ev2:
         st.write("**Confusion Matrix:**")
         cm = confusion_matrix(y_test, y_pred)
-        fig_cm = plt.figure(figsize=(5, 4))
+        fig_cm, ax = plt.subplots(figsize=(5, 4))
         sns.heatmap(
             cm,
             annot=True,
@@ -250,9 +284,10 @@ with tab2:
             cmap="Blues",
             xticklabels=model.classes_,
             yticklabels=model.classes_,
+            ax=ax
         )
-        plt.xlabel("Prediksi")
-        plt.ylabel("Aktual")
+        ax.set_xlabel("Prediksi")
+        ax.set_ylabel("Aktual")
         st.pyplot(fig_cm)
 
 # --- TAB 3: DOWNLOAD MODEL (.pkl) ---
@@ -337,11 +372,11 @@ with tab5:
                 search_counts = filtered_df["label"].value_counts()
                 
                 # Bar Chart Khusus Kata Ini
-                fig_search = plt.figure(figsize=(5, 3))
-                sns.barplot(x=search_counts.index, y=search_counts.values, palette="viridis")
-                plt.title(f"Sentimen untuk '{search_keyword}'")
-                plt.xlabel("Sentimen")
-                plt.ylabel("Jumlah")
+                fig_search, ax = plt.subplots(figsize=(5, 3))
+                sns.barplot(x=search_counts.index, y=search_counts.values, hue=search_counts.index, legend=False, palette="viridis", ax=ax)
+                ax.set_title(f"Sentimen untuk '{search_keyword}'")
+                ax.set_xlabel("Sentimen")
+                ax.set_ylabel("Jumlah")
                 st.pyplot(fig_search)
                 
             with col_search2:
