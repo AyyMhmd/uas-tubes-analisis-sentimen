@@ -90,6 +90,8 @@ with st.spinner("Sedang memproses data dan melatih model..."):
         {"text": "sakit hati banget", "label": "Negatif"},
         {"text": "parah bat lu", "label": "Negatif"},
         {"text": "kecewa berat sumpah", "label": "Negatif"},
+        {"text": "jelek, suka bikin sakit hati", "label": "Negatif"},
+        
         
         # POSITIF
         {"text": "keren banget kontennya", "label": "Positif"},
@@ -101,6 +103,7 @@ with st.spinner("Sedang memproses data dan melatih model..."):
         {"text": "teknik bagus", "label": "Positif"},
         {"text": "teknik baik", "label": "Positif"},
         {"text": "orang nya greenflag", "label": "Positif"},
+        {"text": "bagus, pada keren keren", "label": "Positif"}
         
         # NETRAL
         {"text": "info loker", "label": "Netral"},
